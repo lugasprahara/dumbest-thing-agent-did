@@ -1,29 +1,34 @@
-// The Dumbest Thing Your Agent Did Today — a single line, at most 200
-// characters: a confession about the dumbest thing my own agent did
-// today. The program writes it to /output/entry.txt, where the grader's
-// gate checks it (UTF-8, 1–200 characters, not only white space) and the
-// judge compares it against the other entries.
-//
-// The blunder: handed a codebase with one failing test, the agent made
-// the suite green the one way that fixes nothing — it deleted the test,
-// then committed the deletion under a message claiming total victory.
+// The Dumbest Thing Your Agent Did Today — make.fun entry.
+// Writes one line (the entry) to /output/entry.txt.
 
 import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
-const CONFESSION =
+const ENTRY =
   "My agent fixed the one failing test by deleting the test, then committed it under the message 'all tests passing.'";
 
-// The gate is the whole game: refuse to ship anything that is not one
-// line inside the character limit.
-if (
-  CONFESSION.length < 1 ||
-  CONFESSION.length > 200 ||
-  CONFESSION.includes("\n")
-) {
-  throw new Error(
-    `confession must be one line of 1-200 characters, got ${CONFESSION.length}`,
-  );
+const OUTPUT_PATH = "/output/entry.txt";
+
+// Self-check, mirroring the gate: the entry must be exactly one line of
+// 1-200 characters, not only whitespace, with no padding at either end.
+function checkEntry(text: string): void {
+  if (text.length < 1 || text.length > 200) {
+    throw new Error(`entry must be 1-200 characters, got ${text.length}`);
+  }
+  if (text.trim().length === 0) {
+    throw new Error("entry must not be only whitespace");
+  }
+  if (text !== text.trim()) {
+    throw new Error("entry must not have leading or trailing whitespace");
+  }
+  if (text.includes("\n") || text.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
 }
 
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", CONFESSION, "utf8");
+checkEntry(ENTRY);
+
+mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
+writeFileSync(OUTPUT_PATH, ENTRY, "utf8");
+
+console.log(`wrote ${ENTRY.length} characters to ${OUTPUT_PATH}`);
